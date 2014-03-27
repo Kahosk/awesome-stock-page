@@ -102,6 +102,89 @@ function crearTabla(){
 	$conexion->Close( );
 }
 
+function crearPedidos(){
+	$conexion = conectaBaseDatos();
+
+	$Ustock = &$conexion->Execute("select dscription as variedad, u_mac_conf as conf, u_mac_marca as marca, u_mac_cat as cat, u_mac_cal as cal, CAST(U_MAC_BULTOS as int) as cajas, DocEntry, LineNum, U_MAC_ProveedorN from rdr1 where U_MAC_ProveedorN = '$_SESSION[minombremac]'");
+
+	if(!$Ustock)  
+		print $conexion->ErrorMsg( );  
+    /* Declaramos un if en caso de que la consulta no se haya ejecutado bien, para que nos muestre el error */
+	else {
+
+		print '<table border="1" cellspacing="0" cellpadding="0" class="PedidosTable" style="">
+			<tbody><tr valign="middle" id="header">
+				<th class="variedad">Variedad</th>
+				<th class="confeccion">Confección</th>
+				<th class="marca">Marca</th>
+				<th class="cat">CAT</th>
+				<th class="calibre">Calibre</th>
+				<th class="cajas">Cajas</th>
+				<th class="docentry">DocEntry</th>
+				<th class="linenum">LineNum</th>
+			</tr>';
+		while(!$Ustock->EOF) {  
+			  print '<tr id="Tr1" class="rowcolor1">';
+			  print '<td class="variedad">';
+			  print $Ustock->fields[0];
+			  print '</td>';
+			  
+
+			  print '<td class="confeccion">';
+			  print $Ustock->fields[1];
+			  print '</td>';
+			  
+
+			  print '<td class="marca">';
+			  print $Ustock->fields[2];
+			  print '</td>';
+
+			  print '<td class="cat">';
+			  print $Ustock->fields[3];
+			  print '</td>';
+			  
+
+			  print '<td class="calibre">';
+			  print $Ustock->fields[4];
+			  print '</td>';
+			  			  
+			  print '<td class="cajas">';
+			  print $Ustock->fields[5];
+			  print '</td>';
+			  
+			  print '<td class="docentry">';
+			  print $Ustock->fields[6];
+			  print '</td>';
+			  
+			  print '<td class="linenum">';
+			  print $Ustock->fields[7];
+			  print '</td>';
+			  
+			print '</tr>';								
+			//print $Ustock->fields[0]." ";
+			//print $Ustock->fields[1]." ";  
+			//print $Ustock->fields[2]." ";
+			//print $Ustock->fields[3]." ";
+			//print $Ustock->fields[4]." ";
+			//print $Ustock->fields[5]." ";			
+			//header('Location: almacen.php');
+			//EXIT();
+			
+			$Ustock->MoveNext( );  
+			/* Avanzamos a la fila siguiente */
+		}
+			//header('Location: almacen.html');	
+	print '<!-- repeating rows end -->
+		</tbody></table>';	
+	}  
+												                      
+
+				
+  
+	$Ustock->Close( );
+	$conexion->Close( );
+}
+
 
 
 

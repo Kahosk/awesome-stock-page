@@ -7,6 +7,8 @@
 	<meta charset="utf-8">
 	<title>Login</title>
 	<link rel="shortcut icon" href="favicon.ico" />
+	
+	<!--
 	<script src="development-bundle/ui/jquery.ui.core.js"></script>
 	<script src="development-bundle/ui/jquery.ui.widget.js"></script>
 	<script src="development-bundle/ui/jquery.ui.mouse.js"></script>
@@ -17,9 +19,13 @@
 	<script src="development-bundle/ui/jquery.ui.button.js"></script>
 	<script src="development-bundle/ui/jquery.ui.dialog.js"></script>
 	<script src="development-bundle/ui/jquery.ui.effect.js"></script>
+	-->
+	
 	<link href="css/south-street/jquery-ui-1.10.4.custom.css" rel="stylesheet">
 	<script src="js/jquery-1.10.2.js"></script>
 	<script src="js/jquery-ui-1.10.4.custom.js"></script>
+	<script src="js/jquery.ui.touch-punch.js"></script>
+
 	<style>
 
 	body{
