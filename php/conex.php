@@ -1,23 +1,23 @@
 <?php
-    //$dbcnx=mysql_connect("sbo9","sa","B1Admin"); //usuario y contraseña de la base de datos
+    //$dbcnx=mysql_connect("xxxxx","xxxxx","xxxxxx"); //usuario y contraseÃ±a de la base de datos
     
 	
 	include("adodb/adodb.inc.php");  
 	/* Incluimos el archivo de funciones */  
   
 	$conexion = &ADONewConnection('odbc_mssql');  
-	/* Creamos un objeto de conexión a SQL Server */  
+	/* Creamos un objeto de conexiÃ³n a SQL Server */  
   
-	$datos = "Driver={SQL Server};Server=sbo9;Database=dasben;";  
+	$datos = "xxxx";  
 	/* Definimos nuestro DSN */  
   
-	$conexion->Connect($datos,'sa','B1Admin');  
-	/* Hacemos la conexión con los parámetros correspondientes */  
+	$conexion->Connect($datos,'xxxxx','xxxxxx');  
+	/* Hacemos la conexiÃ³n con los parÃ¡metros correspondientes */  
 	
 	
 	$bd="dasben"; 
 	$tabla1="usuarios"; 
 	$tabla2="incidencias";  
 	$tabla3="historico_incidencias";  
-    //mysql_select_db($bd) or die("Error, No se puede acceder a la base de datos en estos momentos, Inténtelo de nuevo más tarde");
+    //mysql_select_db($bd) or die("Error, No se puede acceder a la base de datos en estos momentos, IntÃ©ntelo de nuevo mÃ¡s tarde");
 ?>
