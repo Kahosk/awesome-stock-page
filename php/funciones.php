@@ -27,7 +27,7 @@ function crearTabla(){
 	
 
 	
-		print '<table border="1" cellspacing="0" cellpadding="0" class="StockTable" style="">
+		print '<table border="1" cellspacing="0" cellpadding="0" class="StockTable" id="StockTable" style="">
 			<tbody><tr valign="middle" id="header">
 				<th class="variedad">Variedad</th>
 				<th class="confeccion">Confección</th>
@@ -105,7 +105,7 @@ function crearTabla(){
 function crearPedidos(){
 	$conexion = conectaBaseDatos();
 
-	$Ustock = &$conexion->Execute("select dscription as variedad, u_mac_conf as conf, u_mac_marca as marca, u_mac_cat as cat, u_mac_cal as cal, CAST(U_MAC_BULTOS as int) as cajas, DocEntry, LineNum, U_MAC_ProveedorN from rdr1 where U_MAC_ProveedorN = '$_SESSION[minombremac]'");
+	$Ustock = &$conexion->Execute("select t1.DocNum as DocNum, t0.dscription as variedad, t0.u_mac_conf as conf, t0.u_mac_marca as marca, t0.u_mac_cat as cat, t0.u_mac_cal as cal, CAST(t0.U_MAC_BULTOS as int) as cajas, t0.DocEntry as DocEntry, t0.LineNum as LineNum, t0.U_MAC_ProveedorN as U_MAC_ProveedorN, t1.U_MAC_Matricula as matricula from rdr1 t0 inner join ordr t1 on t0.DocEntry=t1.DocEntry where t0.U_MAC_ProveedorN = '$_SESSION[minombremac]'");
 
 	if(!$Ustock)  
 		print $conexion->ErrorMsg( );  
@@ -114,6 +114,8 @@ function crearPedidos(){
 
 		print '<table border="1" cellspacing="0" cellpadding="0" class="PedidosTable" style="">
 			<tbody><tr valign="middle" id="header">
+				<th class="npedido">Nº Pedido</th>
+				<th class="matricula">Matricula</th>
 				<th class="variedad">Variedad</th>
 				<th class="confeccion">Confección</th>
 				<th class="marca">Marca</th>
@@ -125,39 +127,48 @@ function crearPedidos(){
 			</tr>';
 		while(!$Ustock->EOF) {  
 			  print '<tr id="Tr1" class="rowcolor1">';
-			  print '<td class="variedad">';
+			  print '<td class="npedido">';
 			  print $Ustock->fields[0];
 			  print '</td>';
 			  
+			  print '<td class="matricula">';
+			  print $Ustock->fields[10];
+			  print '</td>';
+			  
+			  print '<td class="variedad">';
+			  print $Ustock->fields[1];
+			  print '</td>';
+			  
+			  
 
 			  print '<td class="confeccion">';
-			  print $Ustock->fields[1];
+			  print $Ustock->fields[2];
 			  print '</td>';
 			  
 
 			  print '<td class="marca">';
-			  print $Ustock->fields[2];
+			  print $Ustock->fields[3];
 			  print '</td>';
 
 			  print '<td class="cat">';
-			  print $Ustock->fields[3];
+			  print $Ustock->fields[4];
 			  print '</td>';
 			  
 
 			  print '<td class="calibre">';
-			  print $Ustock->fields[4];
+			  print $Ustock->fields[5];
 			  print '</td>';
 			  			  
 			  print '<td class="cajas">';
-			  print $Ustock->fields[5];
-			  print '</td>';
-			  
-			  print '<td class="docentry">';
 			  print $Ustock->fields[6];
 			  print '</td>';
 			  
-			  print '<td class="linenum">';
+			  print '<td class="docentry">';
 			  print $Ustock->fields[7];
+			  print '</td>';
+			  
+			  print '<td class="linenum">';
+			  print $Ustock->fields[8];
 			  print '</td>';
 			  
 			print '</tr>';								
@@ -185,9 +196,6 @@ function crearPedidos(){
 	$conexion->Close( );
 }
 
-
-
-
 function dameConfecciones($variedad = ''){
 	$htmlCode = '';
 	$conexion = conectaBaseDatos();
@@ -204,7 +212,7 @@ function dameConfecciones($variedad = ''){
 		print $conexion->ErrorMsg( );  
     /* Declaramos un if en caso de que la consulta no se haya ejecutado bien, para que nos muestre el error */
 	else {
-		
+		$htmlCode.= '<option value="">- Seleccione una confección -</option>';
 		while(!$confeccion->EOF) { 
 			
 			$htmlCode .= '<option value="';
@@ -221,6 +229,7 @@ function dameConfecciones($variedad = ''){
 	$conexion->Close ( );
 	return $htmlCode;
 }
+
 function dameArticulos(){
     $conexion = conectaBaseDatos();
 	$articulos = &$conexion->Execute("select t0.ItemName from OITM t0 inner join OITB t1 on t0.ItmsGrpCod=t1.ItmsGrpCod where isnull(t1.U_MAC_Tipo, '') <> ''");
@@ -228,7 +237,7 @@ function dameArticulos(){
     print $conexion->ErrorMsg( );  
     /* Declaramos un if en caso de que la consulta no se haya ejecutado bien, para que nos muestre el error */
 	else {
-	print '<select name="variedad" id="variedad"><option value="">- Seleccione una variedad -</option>';
+	
 	while(!$articulos->EOF) { 
 	
 	print '<option value="';
@@ -238,11 +247,12 @@ function dameArticulos(){
 	print '</option>';
     $articulos->MoveNext( ); 
 	}
-	print '</select>';
+
 	}
 	$articulos->Close( );
 	$conexion->Close( );
 }
+
 function dameMarca(){
     $conexion = conectaBaseDatos();
 	$marca = &$conexion->Execute("select * from [@MAC_MARCAS]");
@@ -250,7 +260,7 @@ function dameMarca(){
     print $conexion->ErrorMsg( );  
     /* Declaramos un if en caso de que la consulta no se haya ejecutado bien, para que nos muestre el error */
 	else {
-	print '<select name="marca">';
+
 	while(!$marca->EOF) { 
 	
 	print '<option>';
@@ -258,11 +268,12 @@ function dameMarca(){
 	print '</option>';
     $marca->MoveNext( ); 
 	}
-	print '</select>';
+
 	}
 	$marca->Close( );
 	$conexion->Close( );
 }
+
 function dameCategoria(){
     $conexion = conectaBaseDatos();
 	$categoria = &$conexion->Execute("select * from [@MAC_CATEGORIA]");
@@ -270,7 +281,7 @@ function dameCategoria(){
     print $conexion->ErrorMsg( );  
     /* Declaramos un if en caso de que la consulta no se haya ejecutado bien, para que nos muestre el error */
 	else {
-	print '<select name="cat">';
+
 	while(!$categoria->EOF) { 
 	
 	print '<option value="';
@@ -280,7 +291,7 @@ function dameCategoria(){
 	print '</option>';
     $categoria->MoveNext( ); 
 	}
-	print '</select>';
+
 	}
 	$categoria->Close( );
 	$conexion->Close( );
@@ -302,7 +313,7 @@ function dameCalibre($variedad = ''){
 		print $conexion->ErrorMsg( );  
     /* Declaramos un if en caso de que la consulta no se haya ejecutado bien, para que nos muestre el error */
 	else {
-		
+		$htmlCode.= '<option value="">- Seleccione un calibre -</option>';
 		while(!$calibre->EOF) { 
 			
 			$htmlCode.= '<option value="';
@@ -318,7 +329,6 @@ function dameCalibre($variedad = ''){
 	$conexion->Close( );
 	return $htmlCode;
 }
-
 
 function eliminarFila($eliminar = ''){
     $htmlCode = '';
@@ -369,9 +379,10 @@ function anyadirFila($row = ''){
     /* Declaramos un if en caso de que la consulta no se haya ejecutado bien, para que nos muestre el error */
 	else {
 			$htmlCode.= $consulta;
+			$conect->Close( );
 	//print $htmlCode;
 	}
-	$conect->Close( );
+	
 	$conexion->Close( );
 	return $htmlCode;
 }
@@ -398,6 +409,25 @@ function editaFila($row = ''){
 	else {
 			$htmlCode.= $consulta;
 	//print $htmlCode;
+	}
+	$conect->Close( );
+	$conexion->Close( );
+	return $htmlCode;
+}
+
+function buscar($row = ''){
+    $htmlCode = '';
+	$conexion = conectaBaseDatos();
+	$consulta = "select variedad,confeccion,marca,cat,calibre,trazabilidad,cajas from U_MAC_STOCK where IC ='$_SESSION[misesionmac]' and variedad = '".$row."'";
+	$htmlCode.= $consulta;
+	$conect = &$conexion->Execute($consulta);
+	
+	if(!$conect){ 
+		print $conexion->ErrorMsg( );  
+    }/* Declaramos un if en caso de que la consulta no se haya ejecutado bien, para que nos muestre el error */
+	else {
+		$htmlCode = $conect->GetRows();
+		//print_r($htmlCode);
 	}
 	$conect->Close( );
 	$conexion->Close( );

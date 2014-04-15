@@ -26,4 +26,12 @@ if(isset($_POST['edit'])){
     $respuesta = array("html"=>$html);
     echo json_encode($respuesta);
 }
+if(isset($_POST['search'])){
+ 
+    $html = buscar($_POST['search']);
+ 
+    $respuesta = array("html"=>$html);
+    echo json_encode($respuesta);
+}
+
 ?>

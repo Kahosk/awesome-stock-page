@@ -1,44 +1,52 @@
-$(function () {
+var tableSt = $(function () {
 	var tbl = $("table.StockTable");
-	tbl.css("display", "none");
 	
 	var ht = $("#tabs").innerHeight()-35;		
 	var wd = $("#tabs").innerWidth()-35;
 
+	var pqFilter = {
+		search: function(){
+			var txt = $("#select_row_display_div").val().toUpperCase();
+			$("#select_row_display_div").html(txt+" OK");
+			DM = $grid.pqGrid("option", "dataModel");
+            DM.filterIndx = 0;
+            DM.filterValue = txt;
+            $grid.pqGrid("refreshDataAndView");
+		},
+		render: function (ui) {
+            var DM = ui.dataModel,
+			rowData = ui.rowData,
+			dataIndx = 0,
+			val = rowData[dataIndx],
+			txt = DM.filterValue;
+            txtUpper = txt.toUpperCase(),
+			valUpper = val.toUpperCase();
+            if (dataIndx == DM.filterIndx) {
+                var indx = valUpper.indexOf(txtUpper);
+                if (indx >= 0) {
+                    var txt1 = val.substring(0, indx);
+                    var txt2 = val.substring(indx, indx + txt.length);
+                    var txt3 = val.substring(indx + txt.length);
+                    return txt1 + "<span style='background:yellow;color:#333;'>" + txt2 + "</span>" + txt3;
+                }
+            }
+            return val;
+        }
+	}
+	
 	var obj = $.paramquery.tableToArray(tbl);
 	var newObj = { width: wd, 
-		height:500, 
+		height:400, 
 		title:"Stock",
 		resizable:true,
 		draggable:false,
-		bottomVisible:true,
 		editModel: { clicksToEdit: 0, saveKey: 13 }, 
 		};
-	newObj.dataModel = { data: obj.data, 
-	filterIndx: 0, 
-	filterValue: '',
-	
-	
-	getData: function(fv){
-	
-	this.filterValue = fv;
-	var fi = this.filterIndx;
-	var arr = jQuery.grep($.paramquery.tableToArray(tbl).data,function( n, i ) {
-		//alert(fv);
-		if (fv!=''){
-		return ( n[fi] == fv );
-		}
-		else return true
-	});
-	return {data:arr};
-	}
-	}
-	//alert(obj.data);
-
-	//alert(newObj.dataModel.getData().data);
-	//newObj.dataModel.data = newObj.dataModel.getData().data
-	
-	newObj.colModel = [{ title: "Variedad", width: 250, dataType: "string", resizable:true },
+	newObj.dataModel = { data: obj.data, filterIndx: "", filterValue: "",pqFilter:pqFilter};
+	newObj.colModel = [{ title: "Variedad", width: 250, dataType: "string", resizable:true,
+								render: function (ui) {
+									return pqFilter.render(ui);
+								} },
         { title: "Confección", width: 100, dataType: "string", align: "right", resizable:true },
         { title: "Marca", width: 100, dataType: "string",align: "right", resizable:true},
         { title: "CAT",width: 50, dataType: "string",align: "right", resizable:true},
@@ -47,26 +55,32 @@ $(function () {
 		{ title: "Cajas", width: 50, dataType: "integer",align: "right", resizable:true },
 		{ title: "lineNum", hidden: true, dataType: "integer"}];
 	//$("#grid_table").pqGrid(newObj);
-		newObj.colModel[8] = { dataIndx: 9, editable: false, sortable: false, title: "", width: 30, align: "center",hidden: true, resizable: false, render: function (ui) {
-        var rowData = ui.rowData, dataIndx = ui.dataIndx;
-        var val = rowData[dataIndx];
-        str = "";
-        if (val) {
-            str = "checked='checked'";
-        }
-        return "<input type='checkbox' " + str + " />";
-    }, className: "checkboxColumn"
+	newObj.colModel[8] = { dataIndx: 9, editable: false, sortable: false, title: "", width: 30, align: "center",hidden: true, resizable: false, 
+							render: function (ui) {
+								var rowData = ui.rowData, dataIndx = ui.dataIndx;
+								var val = rowData[dataIndx];
+								str = "";
+								if (val) {
+									str = "checked='checked'";
+								}
+								return "<input type='checkbox' " + str + " />";
+							}, className: "checkboxColumn"
     };
-
 	
-	newObj.rowSelect = function (evt, obj) {
-        var dataCell = obj.dataModel.data[obj.rowIndx][0];
-        var rowIndx = parseInt(obj.rowIndx) + 1;
-        alert(dataCell);
+/* 	newObj.rowSelect = function (evt, ui) {            
+        var rowIndx = ui.rowIndx;
+        newObj.dataModel.data[rowIndx][9] = true;
+        $grid1.pqGrid("refreshCell", { rowIndx: rowIndx, dataIndx: 9 });
     }
+    newObj.rowUnSelect = function (evt, ui) {
+        var rowIndx = ui.rowIndx,
+            data = ui.dataModel.data,
+            evt = ui.evt;
+        data[rowIndx][9] = false;            
+        $grid1.pqGrid("refreshCell", { rowIndx: rowIndx, dataIndx: 9 });
+    } */
 	
-	
-
+	tbl.css("display", "none");
         
 
      //append or prepend the CRUD toolbar to .pq-grid-top or .pq-grid-bottom
@@ -74,10 +88,7 @@ $(function () {
         var $toolbar = $("<div class='toolbar pq-grid-toolbar pq-grid-toolbar-crud'></div>").appendTo($(".pq-grid-top", this));
  
         $("<span>Añadir</span>").appendTo($toolbar).button({ icons: { primary: "ui-icon-circle-plus"} }).click(function (evt) {
-			$(".toolbar").css({ display:"none" });
 			addRow();
-			// $("#add-crud").css({ display:"block" });
-			// new_size();
         });
         $("<span>Editar</span>").appendTo($toolbar).button({ icons: { primary: "ui-icon-pencil"} }).click(function (evt) {
 			
@@ -98,28 +109,8 @@ $(function () {
 		
         $toolbar.disableSelection();
     });
-	
-		
-    $("#grid_table").on("pqgridrender", function (evt, newObj) {
-        var $toolbar = $("<div class='toolbar-pedido pq-grid-toolbar pq-grid-toolbar-crud' style='display:none'></div>").appendTo($(".pq-grid-top", this));
  
-        $("<div>Mostrar todos</div>").appendTo($toolbar).button({ icons: { primary: "ui-icon-circle-plus"} }).click(function (evt) {
-			var $grid = $("#grid_table").pqGrid();
-			var tbl = $("table.StockTable");
-			var obj = $.paramquery.tableToArray(tbl);
-			var DM = $grid.pqGrid("option", "dataModel");
-			DM.data = obj.data;
-			$(".toolbar-pedido").css({ display:"none" });
-			$grid.pqGrid("refreshDataAndView");
-        });
-		// var $toolbar = $("<div class='toolbar-add pq-grid-toolbar pq-grid-toolbar-crud'></div>").appendTo($(".pq-grid-bottom", this));
-		// $("<div>Añadir</div>").appendTo($("#add-form-button")).button({ icons: { primary: "ui-icon-circle-plus"} }).click(function (evt) {
-		// addRow();
-		// }); 
-        // $("#add-crud").appendTo($toolbar);
-        $toolbar.disableSelection();
-    });
-     
+    
     // create popup dialog.
     $("#popup-dialog-crud").dialog({ width: 400, modal: true,
         open: function () { $(".ui-dialog").position({ of: "#grid_table" }); },
@@ -195,88 +186,44 @@ $(function () {
             }).dialog("open");
         }
     }
-
-	// append Row
-	/*function addRow() {
-
-				var DM = $grid.pqGrid("option", "dataModel");
-				var data = DM.data;
- 
-				var $frm = $("form#crud-form-add");
-				$frm.find("input").val("");
-				
-				var row = [];
-                // save the record in DM.data.
-				row[0] = $frm.find("select[name='variedad-add']").val();
-				row[1] = $frm.find("select[name='confeccion-add']").val();
-				row[2] = $frm.find("select[name='marca-add']").val();
-				row[3] = $frm.find("select[name='cat-add']").val();
-				row[4] = $frm.find("select[name='calibre-add']").val();
-				row[5] = $frm.find("input[name='trazabilidadadd']").val();
-				row[6] = $frm.find("input[name='cajasadd']").val();
-                
-				
-				
-				if (row[2]=='' || row[3]=='' || row[4]=='' || row[5]=='' || row[6]=='') {
-					
-					alert('Hay que rellenar todos los campos' + $frm.find("input[name='trazabilidadadd']").val());
-					
-				}else{
-				AnyadirLinea(row);
-				data.push(row);
-                $grid.pqGrid("refreshDataAndView");
-				$("#add-crud").css({ display:"none" });
-				new_size();
-                }
-	}
-    */
-	function addRow() {
+    // append Row
+    function addRow() {
         // debugger;
-		
         var DM = $grid.pqGrid("option", "dataModel");
         var data = DM.data;
  
-        var $frm = $("form#crud-form-add");
+        var $frm = $("form#crud-form");
         $frm.find("input").val("");
  
-        $("#add-crud").dialog({
-			position:{at:"top"},
-			width:$("#tabs").innerWidth()-35,
-			show: {
-			effect: "scale",
-			duration: 500},
-		hide: {effect: "scale",
-			duration: 500},title: "Añadir", buttons: {
+        $("#popup-dialog-crud").dialog({ title: "Añadir", buttons: {
             Añadir: function () {                    
                 var row = [];
                 // save the record in DM.data.
-				row[0] = $frm.find("select[name='variedad-add']").val();
-				row[1] = $frm.find("select[name='confeccion-add']").val();
-				row[2] = $frm.find("select[name='marca-add']").val();
-				row[3] = $frm.find("select[name='cat-add']").val();
-				row[4] = $frm.find("select[name='calibre-add']").val();
-				row[5] = $frm.find("input[name='trazabilidad-add']").val();
-				row[6] = $frm.find("input[name='cajas-add']").val();
+				row[0] = $frm.find("select[name='variedad']").val();
+				row[1] = $frm.find("select[name='confeccion']").val();
+				row[2] = $frm.find("select[name='marca']").val();
+				row[3] = $frm.find("select[name='cat']").val();
+				row[4] = $frm.find("select[name='calibre']").val();
+				row[5] = $frm.find("input[name='trazabilidad']").val();
+				row[6] = $frm.find("input[name='cajas']").val();
                 
 				if (row[2]=='' || row[3]=='' || row[4]=='' || row[5]=='' || row[6]=='') {
 					
 					alert('Hay que rellenar todos los campos');
-				//arg	
+					
 				}else{
 				AnyadirLinea(row);
 				data.push(row);
                 $grid.pqGrid("refreshDataAndView");
                 $(this).dialog("close");
-				$(".toolbar").css({ display:"block" });
 				}
             },
             Cancelar: function () {
                 $(this).dialog("close");
-				$(".toolbar").css({ display:"block" });
             }
         }
         });
-        $("#add-crud").dialog("open");
+        $("#popup-dialog-crud").dialog("open");
     }
     // delete Row.
     function deleteRow() {
@@ -329,7 +276,7 @@ $(function () {
     }
 
 	
-	   $("#grid_parts_paging").change(function (evt) {
+	$("#grid_parts_paging").change(function (evt) {
         var paging="";
         if ($(this).is(":checked")) {
             paging = "local";
@@ -337,7 +284,6 @@ $(function () {
         $grid.pqGrid("option", "dataModel.paging", paging);
 		}).attr("checked", ($grid.pqGrid("option", "dataModel.paging")=="local")?true:false);
  
-	new_size_stock();
 });
 
 $(function () {
@@ -350,6 +296,8 @@ $(function () {
 	var newObj = { width: wd, height:200,title:"Pedidos",
 		resizable:true,
 		draggable:false,
+	
+		
         selectionModel: { type: 'row', mode: 'block' },
         editModel: { clicksToEdit: 0, saveKey: 13 },
         hoverMode: 'row'};
@@ -360,7 +308,6 @@ $(function () {
 	
 	newObj.dataModel = { data: obj.data};
 	newObj.colModel = [{ title: "Nº Pedido", width: 70, dataType: "string", resizable:true },
-		{ title: "Matricula", width: 70, dataType: "string", resizable:true },
 		{ title: "Variedad", width: 250, dataType: "string", resizable:true },
         { title: "Confección", width: 100, dataType: "string", align: "right", resizable:true },
         { title: "Marca", width: 100, dataType: "string",align: "right", resizable:true},
@@ -372,22 +319,19 @@ $(function () {
 	//$("#pedido_table").pqGrid(newObj);
 
     //rowSelect callback.
-	
     newObj.rowSelect = function (evt, obj) {
-        var dataCell = obj.dataModel.data[obj.rowIndx][2];
+        var dataCell = obj.dataModel.data[obj.rowIndx][1];
         var rowIndx = parseInt(obj.rowIndx) + 1;
-		var colIndx = 2; //Variedad
-		//alert(dataCell);
+       
+		$("#select_row_display_div").html(dataCell);
+		tableSt.pqFilter;
+		// var DM = $("#grid_table").pqGrid("option", "dataModel");
+		// DM.filterIndx = 0;
+		// DM.filterValue = dataCell;
+		// $("#grid_table").pqGrid("refreshDataAndView");
 		
-		var $gridStock = $("#grid_table").pqGrid();
-		var DM = $gridStock.pqGrid("option", "dataModel");
-		DM.data = DM.getData(dataCell).data;
-		$(".toolbar-pedido").css({ display:"block" });
-		//alert(DM.data);
-		$gridStock.pqGrid("refreshDataAndView");
 		
     }
-	
 	
 	tbl.css("display", "none");
     var $grid = $("#pedido_table").pqGrid(newObj);
@@ -414,7 +358,7 @@ $(function () {
 
 function buscarCalibre(){
     $variedad = $("#variedad").val();
-	//$variedad-add = $("#variedad-add").val();
+ 
     if($variedad == ""){
             $("#calibre").html("<option value=''>- Primero seleccione una variedad -</option>");
     }
@@ -434,33 +378,6 @@ function buscarCalibre(){
             },
             error:    function(xhr,err){ 
                 alert("Calibre\nreadyState: "+xhr.readyState+"\nstatus: "+xhr.status+"\n \n responseText: "+xhr.responseText);
-            }
-        });
-    }
-}
-
-function buscarCalibreAdd(){
-    $variedad = $("#variedad-add").val();
-	//$variedad-add = $("#variedad-add").val();
-    if($variedad == ""){
-            $("#calibre-add").html("<option value=''>- Primero seleccione una variedad -</option>");
-    }
-    else {
-        $.ajax({
-            dataType: "json",
-            data: {"variedad": $variedad},
-            url:   'php/buscarCal.php',
-            type:  'post',
-            beforeSend: function(){
-                //Lo que se hace antes de enviar el formulario
-                },
-            success: function(respuesta){
-                //lo que se si el destino devuelve algo
-				//alert('OK');
-                $("#calibre-add").html(respuesta.html);
-            },
-            error:    function(xhr,err){ 
-                alert("CalibreAdd\nreadyState: "+xhr.readyState+"\nstatus: "+xhr.status+"\n \n responseText: "+xhr.responseText);
             }
         });
     }
@@ -493,33 +410,6 @@ function buscarConfeccion(){
     }
 }
 
-function buscarConfeccionAdd(){
-    $variedad = $("#variedad-add").val();
- 
-    if($variedad == ""){
-            $("#confeccion-add").html("<option value=''>- Primero seleccione una variedad -</option>");
-    }
-    else {
-        $.ajax({
-            dataType: "json",
-            data: {"variedad": $variedad},
-            url:   'php/buscarCon.php',
-            type:  'post',
-            beforeSend: function(){
-                //Lo que se hace antes de enviar el formulario
-                },
-            success: function(respuesta){
-                //lo que se si el destino devuelve algo
-				//alert('OK');
-                $("#confeccion-add").html(respuesta.html);
-            },
-            error:    function(xhr,err){ 
-                alert("ConfeccionAdd\nreadyState: "+xhr.readyState+"\nstatus: "+xhr.status+"\n \n responseText: "+xhr.responseText);
-            }
-        });
-    }
-}
-
 function EliminarFila($eliminar){
 
     if($eliminar == ""){
@@ -544,6 +434,7 @@ function EliminarFila($eliminar){
         });
     }
 }
+
 
 function AnyadirLinea($row){
 
@@ -610,24 +501,6 @@ function desvalidar(){
     
 }
 
-function new_size_stock(){
-
-	var ht = $("#tabs").innerHeight()-35;		
-	var wd = $("#tabs").innerWidth()-35;
-	$( "#grid_table" ).pqGrid( {width:wd} );
-	$( "#grid_table" ).pqGrid( "refresh" );
-
-}
-
-function new_size_pedido(){
-
-	var ht = $("#tabs").innerHeight()-35;		
-	var wd = $("#tabs").innerWidth()-35;
-	$( "#pedido_table" ).pqGrid( {width:wd} );
-	$( "#pedido_table" ).pqGrid( "refresh" );
-
-}
-
 function new_size(){
 
 	var ht = $("#tabs").innerHeight()-35;		
@@ -640,5 +513,6 @@ function new_size(){
 }
 
 $( window ).resize(function() {
-	new_size();
+	new_size()
 });
+

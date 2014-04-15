@@ -23,14 +23,22 @@ include("php/funciones.php");
 	$(function() {
 		$( "#tabs" ).tabs();
 		$( "#radioset" ).buttonset();
+		
 	});
 	</script>
 	<style>
 	body{
 		font: 62.5% "Trebuchet MS", sans-serif;
 		margin: 50px;
+		margin-top: 0px;
 	}
-
+	
+	#tabs{
+	
+	heigth:500px;
+	
+	}
+	
 	#logo-events	aside {
 	float: right;
 	margin-bottom: -18px;
@@ -84,49 +92,38 @@ include("php/funciones.php");
 	{
 		display:none;
 	}
-	.pedido_table
-	{
-		display:none;
-	}
+
 	</style>
 	<script src="js/almacenes.js"></script>
-   
-</head>
+ </head>
 <body>
 
-	<div id=top_dc >
-		<button id = "desconectar" class="desconectar" >Desconectar</button>	
-		<script>
+	<div id=top_dc class=top_dc >
+	<table width=100%><tbody><tr>
+	<td width=30%></td><td width=70%>
+	<button id = "desconectar" class="desconectar" >Desconectar</button>	
+	</td></tr><tr ><td width=30%>
+	<h2 class="proveedor"><!-- Proveedor -->
+		<?php
+		print $_SESSION["minombremac"];
+		?>
+	</h2></td><td width=70%>
+	<form>
+		<div id="radioset" align=right>
+			<input type="radio" id="radio1" name="radio" checked value='off'><label for="radio1">Stock</label>
+			<input type="radio" id="radio2" name="radio" value='on'><label for="radio2">Orden de carga</label>
+		</div>
+	</form>
+	</td></tr></tbody></table>
+	</div>
+	<script>
 		$("button").button({ icons: { primary: "ui-icon-circle-close"} }).click(function (evt) {
 			desvalidar();
 			
 		});
-		$( "button" ).position({
-			  my: "right top",
-			  at: "right top+20"
-			 });
-		</script>
-	</div>
-	<div id="logo-events" class="constrain clearfix">
-		<div class="logo">
-			<img src="img/logo.png" />
-		</div>
-		<aside><form style="margin-top: 1em;">
-			<div id="radioset">
-				<input type="radio" id="radio1" name="radio" checked="checked"><label for="radio1">Stock</label>
-				<input type="radio" id="radio2" name="radio"><label for="radio2">Pedidos</label>
-			</div>
-
-		</form></aside>
-	</div>
-
-
-	<!-- Proveedor -->
-	<h2 class="proveedor">
-		<?php
-		print $_SESSION["minombremac"];
-		?>
-	</h2>
+		
+	</script>
+	
 	<div id="tabs">
 	<!-- Contenido -->
 		<ul> <!--Almacen Tab -->
@@ -135,11 +132,12 @@ include("php/funciones.php");
 		<!--Tabla Stock -->
 		<div id="tabs-1">
 			<div id="pedido_table" class="pedido_table"></div>
+			<div class=select_row_display_div id=select_row_display_div></div>
 			<div id="grid_table"></div>
 		</div>
 	<!-- End Contenido -->
 	</div>
-
+    
 	<!-- Tabla html oculta -->
 	<?php 
 	crearTabla();
@@ -148,15 +146,17 @@ include("php/funciones.php");
 	<!-- End Tabla html oculta -->
 	<!-- Dialogo crud -->
 	<div id="popup-dialog-crud" >
-		<form id="crud-form" class="pq-grid-crud-popup" method="post" name="crud-form" action="validar.php">
+		<form id="crud-form" class="pq-grid-crud-popup" method="post" name="crud-form">
 			<input type="hidden" name="recId" value="">
 			<table align="center"><tbody>
 				<tr>            
 					<td class="label">Variedad:</td>
 					<td>
+					<select name="variedad" id="variedad"><option value="">- Seleccione una variedad -</option>
 					<?php	
 					dameArticulos();
 					?>
+					</select>
 					</td>
 				</tr><tr>            
 					<td class="label">Confección:</td>            
@@ -164,24 +164,30 @@ include("php/funciones.php");
 					<option value=''>- Primero seleccione una variedad -</option>	
 					<?php
 					//dameConfecciones('CEBOLLA DOUX');	
-					?></td>           
+					?>
+					</select>
+					</td>           
 				</tr><tr>            
 					<td class="label">Marca:</td>
 					<td>
+					<select name="marca">
 					<?php	
 					dameMarca();
 					?>
+					</select>
 					</td>           
 				</tr><tr>            
 					<td class="label">CAT:</td>
 					<td>
+					<select name="cat">
 					<?php	
 					dameCategoria();
 					?>
+					</select>
 					</td>           
 				</tr><tr>            
 					<td class="label">Calibre:</td>
-					<td><select name="calibre" id="calibre">
+					<td><select name="calibre" id="calibre" >
 					<option value=''>- Primero seleccione una variedad -</option>
 					</select>
 					</td>           
@@ -196,6 +202,67 @@ include("php/funciones.php");
 		</form>
 	</div>
 	<!-- End Dialogo crud -->
+	<!-- Barra add -->
+	<div id="add-crud" style="display:none">
+		<form id="crud-form-add" name="crud-form-add">
+			<input type="hidden" name="recId" value="">
+			<table align="center"><tbody>
+				<tr>            
+					<td>
+					<select name="variedad-add" id="variedad-add"><option value="">- Seleccione una variedad -</option>
+					<?php
+					dameArticulos();
+					?>
+					</select>
+					</td>
+
+					<td>
+					<select name="confeccion-add" id="confeccion-add">
+					<option value=''>- Primero seleccione una variedad -</option>	
+					<?php
+					//dameConfecciones('CEBOLLA DOUX');	
+					?>
+					</select>
+					</td>           
+			           
+		
+					<td>
+					<select name="marca-add">
+					<?php	
+					dameMarca();
+					?>
+					</select>
+					</td>           
+			          
+		
+					<td>
+					<select name="cat-add">
+					<?php	
+					dameCategoria();
+					?>
+					</select>
+					</td>           
+			          
+			
+					<td><select name="calibre-add" id="calibre-add">
+					<option value=''>- Primero seleccione una variedad -</option>
+					</select>
+					</td>           
+			          
+			
+					<td><input type="text" name="trazabilidad-add" id="trazabilidad-add" placeholder="Trazabilidad"></td>           
+		
+				
+					<td><input type="number" name="cajas-add" id="cajas-add" min=0 placeholder="Cajas"></td>
+
+				</tr>
+			</tbody></table>
+		</form>
+							<div id="add-form-button">
+					
+					</div>
+	</div>
+	<!-- End Barra add -->
 	<!-- Dialogo eliminar -->
 	<div id="popup-dialog-eliminar" ></div>
 	<!-- End Dialogo eliminar -->
@@ -203,6 +270,48 @@ include("php/funciones.php");
 	<script>
 	$("#variedad").on("change", buscarCalibre);
 	$("#variedad").on("change", buscarConfeccion);
+	
+	$("#variedad-add").on("change", buscarCalibreAdd);
+	$("#variedad-add").on("change", buscarConfeccionAdd);
+	
+	
+	
+	if($('#radioset :radio:checked').val()=='off'){
+		$(".pedido_table").css({ display:"none" });
+		$(".toolbar-pedido").css({ display:"none" });
+	}
+	$("input:radio[name=radio]").click(function(){
+		var value = $(this).val();
+		var $grid = $("#grid_table").pqGrid();
+		var colM = $grid.pqGrid("option", "colModel");
+		if (value=='on') {
+			$(".pedido_table").css({ display:"block" });
+			$(".toolbar").css({ display:"none" });
+			colM[8].hidden = false;
+			$grid.pqGrid("option", "colModel", colM);
+			new_size();
+			//pq-grid-toolbar display:none
+			//alert(value);
+		}else{
+			$(".pedido_table").css({ display:"none" });
+			$(".toolbar").css({ display:"block" });
+			$(".toolbar-pedido").css({ display:"none" });
+			colM[8].hidden = true;
+			var tbl = $("table.StockTable");
+			var obj = $.paramquery.tableToArray(tbl);
+			$grid.pqGrid("option", "colModel", colM);
+			var DM = $grid.pqGrid("option", "dataModel");
+			DM.data = obj.data;
+			$grid.pqGrid("refreshDataAndView");
+			new_size();
+			
+			//window.location.href = 'almacen.php'
+			
+			//alert(value);
+			//.pedido_table{display:none;}
+		}
+	});
+	
 	</script>
 </body>
 </html>
