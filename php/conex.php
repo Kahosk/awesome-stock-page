@@ -1,20 +1,20 @@
 <?php
-    //$dbcnx=mysql_connect("sbo9","sa","B1Admin"); //usuario y contraseña de la base de datos
+    //$dbcnx=mysql_connect("xxxxx","xxxxx","xxxxxx"); //usuario y contraseña de la base de datos
     
-	
+
 	include("adodb/adodb.inc.php");  
 	/* Incluimos el archivo de funciones */  
   
 	$conexion = &ADONewConnection('odbc_mssql');  
 	/* Creamos un objeto de conexión a SQL Server */  
   
-	$datos = "Driver={SQL Server};Server=sbo9;Database=dasben;";  
+	$datos = "xxxx";  
 	/* Definimos nuestro DSN */  
   
-	$conexion->Connect($datos,'sa','B1Admin');  
+	$conexion->Connect($datos,'xxxxx','xxxxxx');  
 	/* Hacemos la conexión con los parámetros correspondientes */  
-	
-	
+
+
 	$bd="dasben"; 
 	$tabla1="usuarios"; 
 	$tabla2="incidencias";  
