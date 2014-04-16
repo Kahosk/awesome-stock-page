@@ -390,12 +390,11 @@ $(function () {
         var dataCell = obj.dataModel.data[obj.rowIndx][1];
         var rowIndx = parseInt(obj.rowIndx) + 1;
 		var colIndx = 1; //Variedad
-		alert(dataCell);
+		//alert(dataCell);
 		
-		var $gridStock = $("#grid_table").pqGrid();
+		var $gridStock = $("#pedido_table").pqGrid();
 		var DM = $gridStock.pqGrid("option", "dataModel");
 		DM.data = DM.getData(dataCell).data;
-		$(".toolbar-pedido").css({ display:"block" });
 		//alert(DM.data);
 		$gridStock.pqGrid("refreshDataAndView");
 		
@@ -442,8 +441,22 @@ $(function () {
         obj.data[i].push("");
     }		
 
-	
-	newObj.dataModel = { data: obj.data};
+	newObj.dataModel = { data: obj.data, 
+		filterIndx: 0, 
+		filterValue: '',
+		getData: function(fv){
+			this.filterValue = fv;
+			var fi = this.filterIndx;
+			var arr = jQuery.grep($.paramquery.tableToArray(tbl).data,function( n, i ) {
+				
+				if (fv!=''){
+					return ( n[fi] == fv );
+				}else return true
+			});
+	return {data:arr};
+		}
+	};
+
 	newObj.colModel = [{ title: "Nº Pedido", width: 70, dataType: "string", resizable:true },
 		{ title: "Matricula", width: 70, dataType: "string", resizable:true },
 		{ title: "Variedad", width: 250, dataType: "string", resizable:true },
